@@ -2,6 +2,7 @@ import time
 
 import argparse
 
+import unicodedata
 
 import socketserver
 
@@ -81,10 +82,24 @@ def time2str(sec):
     return f'{s_m}:{s_s}'
   
 def pad(string, length):
-  lenl = (length - len(string)) // 2
-  lenr = length - len(string) - lenl
+  lenl = (length - stringWidth(string)) // 2
+  lenr = length - stringWidth(string) - lenl
   return ' ' * lenl + string + ' ' * lenr
-  
+
+def stringWidth(string): #Thank you : https://stackoverflow.com/questions/48598304/width-of-a-string-with-zero-width-and-two-width-characters-in-python-3-in-a-ter
+    width = 0
+    for c in string:
+        # For zero-width characters
+        if unicodedata.category(c)[0] in ('M', 'C'):
+            continue
+        w = unicodedata.east_asian_width(c)
+        if w in ('N', 'Na', 'H', 'A'):
+            width += 1
+        else:
+            width += 2
+
+    return width
+
 class ThreadedTCPRequestHandler(socketserver.BaseRequestHandler):
   def handle(self):
     print(f"Request from {self.client_address}")
