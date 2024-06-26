@@ -84,6 +84,7 @@ def pad(string, length):
   lenl = (length - len(string)) // 2
   lenr = length - len(string) - lenl
   return ' ' * lenl + string + ' ' * lenr
+  
 class ThreadedTCPRequestHandler(socketserver.BaseRequestHandler):
   def handle(self):
     print(f"Request from {self.client_address}")
