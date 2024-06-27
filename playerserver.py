@@ -6,6 +6,7 @@ import unicodedata
 
 import socketserver
 
+import re
 
 parser = argparse.ArgumentParser(
                         prog='Ascii player',
@@ -56,12 +57,13 @@ if subtitle:
     if(" --> " in lines[now]):
       s, e = lines[now].split(" --> ")
       sh, sm, ss = map(float, s.split(':'))
-      eh, em, es = map(float, e.split(':'))
+      eh, em, es = map(float, e.split(' ')[0].split(':'))
       start = sh * 3600 + sm * 60 + ss
       end = eh * 3600 + em * 60 + es
       while lines[now] != "":
         now += 1
-        _str += lines[now] + '\n'
+        deleted = re.sub(r'<[^>]*>','',lines[now])
+        _str += deleted + '\n'
       subtitles.append((start, end, _str.rstrip('\n')))
       _str = ""
     now += 1
@@ -134,7 +136,7 @@ class ThreadedTCPRequestHandler(socketserver.BaseRequestHandler):
             sub_height = len(nowsub.split('\n'))
             for i in nowsub.split('\n'):
               to_send += b'\n' + pad(i, width).encode()
-            to_send += b'\n' + b' ' * width * max(0,(4 - sub_height))
+            to_send += (b'\n' + b' ' * width) * max(0,(4 - sub_height))
             to_send += b'\n' + payload + b' / ' + full_payload
             to_send += b'\n' + b'=' * int(width * (time.time() - base_time) / full_time)
             self.request.send(to_send)
